@@ -1,6 +1,7 @@
 build/
+cmake_*/
 *.o
 *.dSYM # DWARF dbg info
 a.out
 hash
-frankenstein.txt
+*.txt

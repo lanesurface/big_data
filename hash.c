@@ -6,7 +6,7 @@
 #include <math.h> // -lm
 
 #define F_BUFF_SZ 256  /* size of read buffer */
-#define INIT_CAP  1000 /* number of initial bucket entries */
+#define INIT_CAP  10   /* number of initial bucket entries */
 #define LOAD_FTR  3    /* bounds the min number of buckets */
 #define BRK_CHR   " ,;.?!\"()[]\r\n"
 
@@ -85,27 +85,37 @@ static int hash_map_insert_node(
   struct map_ent *
 );
 
+/**
+ * FIXME: There is once again a regression when the map needs to be 
+ * rehashed. The count of the words is off by odd amounts. When the 
+ * map is never rehashed, this problem disappears.
+ */
 static int
-hash_map_rehash(struct hash_map *h_map, size_t n_add)
+hash_map_rehash(struct hash_map *h_map)
 {
   static struct hash_map new_map;
-  struct map_ent *m_ent;
-  size_t new_cap, tot_bk;
+  struct map_ent *m_ent,*m_next_ent;
+  size_t new_cap;
   int r_val;
 
   if (h_map) {
-    tot_bk=n_add+h_map->nm_ent;
-    if (tot_bk>=LOAD_FTR*h_map->cap) { /* unlikely */
+    if (h_map->nm_ent>=LOAD_FTR*h_map->cap) { /* unlikely */
       /* build new hash_map, then swap */
       new_cap=2*h_map->cap;
+      printf(
+        "rehashing map with %zu buckets\n",
+        new_cap 
+        );
       r_val=hash_map_alloc(&new_map,new_cap);
       if (r_val) return r_val;
       for (size_t i=0; i<h_map->cap; i++) {
         m_ent=h_map->list[i];
         while (m_ent) {
+          m_next_ent=m_ent->next;
+          m_ent->next=NULL;
           r_val=hash_map_insert_node(&new_map,m_ent);
           if (r_val) return r_val;
-          m_ent=m_ent->next;
+          m_ent=m_next_ent;
         }
       }
       /* don't call hash_map_free here since we still need the nodes */
@@ -128,7 +138,7 @@ hash_map_insert_node(struct hash_map *h_map, struct map_ent *m_ent)
     m_ent->next=h_map->list[h];
     h_map->list[h]=m_ent;
     h_map->nm_ent++;
-    return hash_map_rehash(h_map,1);
+    return hash_map_rehash(h_map);
   }
   return -1;
 }
@@ -267,9 +277,8 @@ tok_file(const char *fl_name, struct hash_map *h_map)
       }
       sv=fgets(file_buff,F_BUFF_SZ,fp);
     }
-    return 0;
   }
-  return -1;
+  return 0;
 }
 
 int
@@ -282,12 +291,14 @@ main(int argc, char *argv[])
   if (argc>2) {
     r_val=hash_map_alloc(&h_map,INIT_CAP);
     if (!r_val) {
-      // ./hash -rk <key> *.txt
       key=argv[1];
-      for (int i=2; i<argc; i++) tok_file(
-        argv[i],
-        &h_map
-        );
+      for (int i=2; i<argc; i++) {
+        r_val=tok_file(argv[i],&h_map);
+        if (r_val) {
+          fprintf(stderr,"[ERROR]: %d\n",r_val);
+          return r_val;
+        }
+      }
       v_ptr=hash_map_fetch_node(&h_map,key);
       if (v_ptr) printf(
         "%s appears %d times\n",
