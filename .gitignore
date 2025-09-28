@@ -1,0 +1,6 @@
+build/
+*.o
+*.dSYM # DWARF dbg info
+a.out
+hash
+frankenstein.txt
