@@ -85,11 +85,6 @@ static int hash_map_insert_node(
   struct map_ent *
 );
 
-/**
- * FIXME: There is once again a regression when the map needs to be 
- * rehashed. The count of the words is off by odd amounts. When the 
- * map is never rehashed, this problem disappears.
- */
 static int
 hash_map_rehash(struct hash_map *h_map)
 {
@@ -102,10 +97,6 @@ hash_map_rehash(struct hash_map *h_map)
     if (h_map->nm_ent>=LOAD_FTR*h_map->cap) { /* unlikely */
       /* build new hash_map, then swap */
       new_cap=2*h_map->cap;
-      printf(
-        "rehashing map with %zu buckets\n",
-        new_cap 
-        );
       r_val=hash_map_alloc(&new_map,new_cap);
       if (r_val) return r_val;
       for (size_t i=0; i<h_map->cap; i++) {
