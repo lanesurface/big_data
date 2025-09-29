@@ -62,15 +62,15 @@ hash_map_alloc(struct hash_map *h_map, size_t sz)
 static void
 hash_map_free(struct hash_map *h_map)
 {
-  struct map_ent *m_ent,*m_ent_next;
+  struct map_ent *m_ent,*m_next_ent;
 
   if (h_map) {
     for (size_t i=0; i<h_map->cap; i++) {
       m_ent=h_map->list[i];
       while (m_ent) {
-        m_ent_next=m_ent->next;
+        m_next_ent=m_ent->next;
         hash_map_free_ent(m_ent);
-        m_ent=m_ent_next;
+        m_ent=m_next_ent;
       }
     }
     h_map->nm_ent=0, h_map->cap=0;
