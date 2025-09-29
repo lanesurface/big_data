@@ -5,7 +5,7 @@ LDLIBS:=-lm
 #	$(CC) -g -Wall -Wextra -o $@ $^ -lm
 
 hash: hash.o
-	$(CC) -o $@ $? $(LDFLAGS)
+	$(CC) -o $@ $? $(LDLIBS)
 
 %.o: %.c 
 	$(CC) -c $(CFLAGS) -o $@ $^
