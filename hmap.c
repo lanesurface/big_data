@@ -3,24 +3,16 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h> // -lm
+#include <math.h>
+#include "hmap.h"
 
-#define F_BUFF_SZ 256  /* size of read buffer */
-#define INIT_CAP  10   /* number of initial bucket entries */
-#define LOAD_FTR  3    /* bounds the min number of buckets */
-#define BRK_CHR   " ,;.?!\"()[]\r\n"
+#define HM_LOAD_FTR 3 /* bounds the min number of buckets */
 
 #ifdef __GNUC__
 #define WEAK_DEF __attribute__((weak))
 #else 
 #define WEAK_DEF
 #endif
-
-extern WEAK_DEF uint32_t hash(
-  const char *, 
-  size_t, 
-  size_t *
-);
 
 struct map_ent {
   char *key;
@@ -29,10 +21,11 @@ struct map_ent {
   struct map_ent *next;
 };
 
-struct hash_map {
-  size_t cap, nm_ent;
-  struct map_ent **list; /* buckets */
-};
+extern WEAK_DEF uint32_t hash(
+  const char *, 
+  size_t, 
+  size_t *
+);
 
 static struct map_ent *hash_map_create_ent(
   const char *,
@@ -41,7 +34,7 @@ static struct map_ent *hash_map_create_ent(
 
 static void hash_map_free_ent(struct map_ent *);
 
-static int 
+int 
 hash_map_alloc(struct hash_map *h_map, size_t sz)
 {
   struct map_ent **m_bk;
@@ -59,7 +52,7 @@ hash_map_alloc(struct hash_map *h_map, size_t sz)
   return -1;
 }
 
-static void
+void
 hash_map_free(struct hash_map *h_map)
 {
   struct map_ent *m_ent,*m_next_ent;
@@ -94,7 +87,7 @@ hash_map_rehash(struct hash_map *h_map)
   int r_val;
 
   if (h_map) {
-    if (h_map->nm_ent>=LOAD_FTR*h_map->cap) { /* unlikely */
+    if (h_map->nm_ent>=HM_LOAD_FTR*h_map->cap) { /* unlikely */
       /* build new hash_map, then swap */
       new_cap=2*h_map->cap;
       r_val=hash_map_alloc(&new_map,new_cap);
@@ -134,7 +127,7 @@ hash_map_insert_node(struct hash_map *h_map, struct map_ent *m_ent)
   return -1;
 }
 
-static int
+int
 hash_map_insert_kv(struct hash_map *h_map, const char *k, int v) 
 {
   struct map_ent *m_ent;
@@ -150,7 +143,7 @@ hash_map_insert_kv(struct hash_map *h_map, const char *k, int v)
   return -1; /* HM_ERR_INV_ARG */
 }
 
-static int *
+int *
 hash_map_fetch_node(const struct hash_map *h_map, const char *k)
 {
   struct map_ent *m_ent;
@@ -245,79 +238,6 @@ hash_map_free_ent(struct map_ent *m_ent)
   }
 }
 
-static int 
-tok_file(const char *fl_name, struct hash_map *h_map)
-{
-  FILE *fp;
-  char file_buff[F_BUFF_SZ], *sv;
-  int r_val, *v_ptr;
-
-  fp=fopen(fl_name,"r");
-  if (fp && h_map) {
-    sv=fgets(file_buff,F_BUFF_SZ,fp);
-    while (sv && !feof(fp)) {
-      sv=strtok(sv,BRK_CHR);
-      while (sv) {
-        v_ptr=hash_map_fetch_node(h_map,sv);
-        if (v_ptr) (*v_ptr)++;
-        else {
-          r_val=hash_map_insert_kv(h_map,sv,1);
-          if (r_val) return r_val;
-        }
-        sv=strtok(NULL,BRK_CHR);
-      }
-      sv=fgets(file_buff,F_BUFF_SZ,fp);
-    }
-  }
-  return 0;
-}
-
-int
-main(int argc, char *argv[])
-{
-  struct hash_map h_map;
-  int *bk_n, *v_ptr, r_val;
-  char *key;
-
-  if (argc>2) {
-    r_val=hash_map_alloc(&h_map,INIT_CAP);
-    if (!r_val) {
-      key=argv[1];
-      for (int i=2; i<argc; i++) {
-        r_val=tok_file(argv[i],&h_map);
-        if (r_val) {
-          fprintf(stderr,"[ERROR]: %d\n",r_val);
-          return r_val;
-        }
-      }
-      v_ptr=hash_map_fetch_node(&h_map,key);
-      if (v_ptr) printf(
-        "%s appears %d times\n",
-        key,
-        *v_ptr 
-        );
-      else puts("No matches found");
-    }
-  } else {
-    fprintf(stderr, "USAGE: hash <key> <file_0> ... <file_N>\n");
-    exit(-1);
-  }
-#if 0
-  /* export the number of nodes per bucket as a csv */
-  bk_n=calloc(sizeof(*bk_n),h_map.cap);
-  if (bk_n) {
-    hash_map_cnt_bk(&h_map,bk_n);
-    for (size_t i=0; i<h_map.cap; i++) printf(
-      "%d\n",
-      bk_n[i]
-      );
-  }
-#endif
-  hash_map_free(&h_map);
-
-  return r_val;
-}
-
 uint32_t
 hash(const char *key, size_t cap, size_t *n)
 {
@@ -334,6 +254,7 @@ hash(const char *key, size_t cap, size_t *n)
 }
 
 #if 0
+/* multiplicative hash - bad clustering */
 uint32_t
 hash(const char *key, size_t cap, size_t *n)
 {

@@ -1,5 +1,5 @@
 build/
-cmake_*/
+cmake-build-*
 *.o
 *.dSYM # DWARF dbg info
 a.out

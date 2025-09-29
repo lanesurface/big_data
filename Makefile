@@ -4,7 +4,7 @@ LDLIBS:=-lm
 #hash: hash.c
 #	$(CC) -g -Wall -Wextra -o $@ $^ -lm
 
-hash: hash.o
+hash: hmap.o main.o
 	$(CC) -o $@ $? $(LDLIBS)
 
 %.o: %.c 
