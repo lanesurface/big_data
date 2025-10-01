@@ -10,7 +10,7 @@
 #define MK_ERR_STR_ARRAY(_errno,_id,...) [_id]=#_errno,
 #define DEF_ERR_T(_errno,_id,...) _errno=_id,
 
-const char *_ds_errno_str_array[]={
+static const char *_ds_errno_str_array[]={
   FOR_EACH_ERR(MK_ERR_STR_ARRAY)
 };
 
