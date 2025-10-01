@@ -11,19 +11,20 @@ struct hash_map {
 };
 
 
-extern int hash_map_alloc(
+extern enum ds_errno_T hash_map_alloc(
   struct hash_map *,
   size_t
 );
 
 extern void hash_map_free(struct hash_map *);
 
-extern int hash_map_insert_kv(
+extern enum ds_errno_T hash_map_insert_kv(
   struct hash_map *,
   const char *,
   int
 );
 
+/* TODO: Make nodes accept generic type `void *` */
 extern int *hash_map_fetch_node(
   const struct hash_map *,
   const char *

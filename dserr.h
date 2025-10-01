@@ -22,13 +22,13 @@ static inline const char *
 ds_err_str(enum hm_errno_T errno)
 {
   static const char *errno_inv_str="[[inv. error]]";
-  if (errno<0) {
-    errno*=-1;
-    if (errno>=DS_ERR_MAX) {
-      return errno_inv_str;
-    }
+
+  if (errno<0) errno*=-1;
+  if (errno>=DS_ERR_MAX) {
+    return errno_inv_str;
+  } else {
+    return _ds_errno_str_array[errno];
   }
-  return _ds_errno_str_array[errno];
 }
 
 #endif

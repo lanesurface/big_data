@@ -35,7 +35,7 @@ static struct map_ent *hash_map_create_ent(
 
 static void hash_map_free_ent(struct map_ent *);
 
-int 
+enum ds_errno_T
 hash_map_alloc(struct hash_map *h_map, size_t sz)
 {
   struct map_ent **m_bk;
@@ -76,12 +76,12 @@ hash_map_free(struct hash_map *h_map)
   }
 }
 
-static int hash_map_insert_node(
+static enum ds_errno_T hash_map_insert_node(
   struct hash_map *,
   struct map_ent *
 );
 
-static int
+static enum ds_errno_T
 hash_map_rehash(struct hash_map *h_map)
 {
   static struct hash_map new_map;
@@ -114,7 +114,7 @@ hash_map_rehash(struct hash_map *h_map)
   return DS_ERR_INV_ARG;
 }
 
-static int 
+static enum ds_errno_T
 hash_map_insert_node(struct hash_map *h_map, struct map_ent *m_ent)
 {
   uint32_t h;
@@ -130,8 +130,8 @@ hash_map_insert_node(struct hash_map *h_map, struct map_ent *m_ent)
   return DS_ERR_INV_ARG;
 }
 
-int
-hash_map_insert_kv(struct hash_map *h_map, const char *k, int v) 
+enum ds_errno_T
+hash_map_insert_kv(struct hash_map *h_map, const char * k, int v)
 {
   struct map_ent *m_ent;
 
@@ -168,7 +168,7 @@ hash_map_fetch_node(const struct hash_map *h_map, const char *k)
 }
 
 /* generate list containing number of collisions */
-static int 
+static enum ds_errno_T
 hash_map_cnt_bk(const struct hash_map *h_map, int bk_n[])
 {
   struct map_ent *m_ent;
@@ -188,7 +188,7 @@ hash_map_cnt_bk(const struct hash_map *h_map, int bk_n[])
   return DS_ERR_INV_ARG;
 }
 
-static int 
+static enum ds_errno_T
 hash_map_print(const struct hash_map *h_map)
 {
   struct map_ent *m_ent;
