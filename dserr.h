@@ -14,12 +14,12 @@ static const char *_ds_errno_str_array[]={
   FOR_EACH_ERR(MK_ERR_STR_ARRAY)
 };
 
-enum hm_errno_T { 
+enum ds_errno_T {
   FOR_EACH_ERR(DEF_ERR_T)
 };
 
 static inline const char *
-ds_err_str(enum hm_errno_T errno)
+ds_err_str(enum ds_errno_T errno)
 {
   static const char *errno_inv_str="[[inv. error]]";
 
