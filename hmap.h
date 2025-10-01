@@ -10,20 +10,23 @@ struct hash_map {
   struct map_ent **list; /* buckets */
 };
 
+
 extern int hash_map_alloc(
   struct hash_map *,
   size_t
 );
+
 extern void hash_map_free(struct hash_map *);
+
 extern int hash_map_insert_kv(
   struct hash_map *,
   const char *,
   int
 );
+
 extern int *hash_map_fetch_node(
   const struct hash_map *,
   const char *
 );
 
 #endif
-

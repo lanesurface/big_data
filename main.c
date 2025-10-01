@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "hmap.h"
+#include "dserr.h"
 
 #define F_BUFF_SZ 256  /* size of read buffer */
 #define INIT_CAP  10   /* number of initial bucket entries */
@@ -38,7 +39,7 @@ int
 main(int argc, char *argv[])
 {
   struct hash_map h_map;
-  int *bk_n, *v_ptr, r_val;
+  int r_val, *v_ptr;
   char *key;
 
   if (argc>2) {
@@ -48,7 +49,12 @@ main(int argc, char *argv[])
       for (int i=2; i<argc; i++) {
         r_val=tok_file(argv[i],&h_map);
         if (r_val) {
-          fprintf(stderr,"[ERROR]: %d\n",r_val);
+          fprintf(
+            stderr,
+            "[%s]: %d\n",
+            ds_err_str(r_val),
+            r_val
+            );
           return r_val;
         }
       }

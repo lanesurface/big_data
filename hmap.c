@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include "hmap.h"
+#include "dserr.h"
 
 #define HM_LOAD_FTR 3 /* bounds the min number of buckets */
 
@@ -47,9 +48,11 @@ hash_map_alloc(struct hash_map *h_map, size_t sz)
       h_map->cap=sz;
       h_map->nm_ent=0;
       return 0;
+    } else {
+      return DS_ERR_NO_MEM;
     }
   }
-  return -1;
+  return DS_ERR_INV_ARG;
 }
 
 void
@@ -108,7 +111,7 @@ hash_map_rehash(struct hash_map *h_map)
     }
     return 0;
   }
-  return -1; /* HM_ERR_INV_ARG */
+  return DS_ERR_INV_ARG;
 }
 
 static int 
@@ -124,7 +127,7 @@ hash_map_insert_node(struct hash_map *h_map, struct map_ent *m_ent)
     h_map->nm_ent++;
     return hash_map_rehash(h_map);
   }
-  return -1;
+  return DS_ERR_INV_ARG;
 }
 
 int
@@ -138,9 +141,9 @@ hash_map_insert_kv(struct hash_map *h_map, const char *k, int v)
       h_map,
       m_ent
       );
-    return -1; /* HM_ERR_NO_MEM */
+    return DS_ERR_NO_MEM;
   }
-  return -1; /* HM_ERR_INV_ARG */
+  return DS_ERR_INV_ARG;
 }
 
 int *
@@ -170,7 +173,7 @@ hash_map_cnt_bk(const struct hash_map *h_map, int bk_n[])
 {
   struct map_ent *m_ent;
   int n;
-  
+
   if (h_map && bk_n) {
     for (size_t i=0; i<h_map->cap; i++) {
       n=0, m_ent=h_map->list[i];
@@ -182,7 +185,7 @@ hash_map_cnt_bk(const struct hash_map *h_map, int bk_n[])
     }
     return 0;
   }
-  return -1;
+  return DS_ERR_INV_ARG;
 }
 
 static int 
@@ -204,7 +207,7 @@ hash_map_print(const struct hash_map *h_map)
       }
     }
   }
-  return -1;
+  return DS_ERR_INV_ARG;
 }
 
 static struct map_ent *
